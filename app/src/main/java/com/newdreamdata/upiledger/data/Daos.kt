@@ -70,7 +70,7 @@ interface ExpenseDao {
                  FROM expenses WHERE timestamp >= :since AND (payee != '' OR upiId != '') AND needsReview = 0
                  GROUP BY k) c
            ON (CASE WHEN e.payee = '' THEN e.upiId ELSE e.payee END) = c.k AND e.timestamp = c.maxTs
-           ORDER BY c.cnt DESC, c.maxTs DESC LIMIT :limit"""
+           GROUP BY c.k ORDER BY c.cnt DESC, c.maxTs DESC LIMIT :limit"""
     )
     fun observeQuickPayees(since: Long, limit: Int): Flow<List<QuickPayee>>
 
