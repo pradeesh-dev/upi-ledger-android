@@ -13,6 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,23 +29,21 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Restore signing keystore
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      - name: Configure release signing
+        if: ${{ env.KEYSTORE_PASSWORD != '' }}
         run: |
-          mkdir -p "$RUNNER_TEMP/keys"
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/keys/release.jks"
-          echo "KEYSTORE_FILE=$RUNNER_TEMP/keys/release.jks" >> "$GITHUB_ENV"
+          echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/keystore/upi-ledger-release.jks" >> "$GITHUB_ENV"
+          echo "KEY_ALIAS=upiledger" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "Release signing enabled"
+      - name: Warn when unsigned
+        if: ${{ env.KEYSTORE_PASSWORD == '' }}
+        run: echo "::warning::KEYSTORE_PASSWORD secret not set - APK will be signed with a throwaway debug key"
 
       - name: Unit tests (parsers)
         run: ./gradlew --no-daemon testDebugUnitTest
 
       - name: Assemble signed release APK
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew --no-daemon assembleRelease
 
       - name: Rename APK

@@ -63,7 +63,10 @@ object CsvStatement {
                 continue
             }
 
-            val upi = ParseUtil.UPI_REGEX.find(narr)?.value?.lowercase(Locale.ROOT) ?: ""
+            // Look inside each narration segment first: HDFC-style "UPI-RAJU TEA STALL-raju@okicici-..." would
+            // otherwise match "STALL-raju@okicici" because '-' is a valid VPA character.
+            val upi = (narr.split('/', '-', '|').firstNotNullOfOrNull { ParseUtil.UPI_REGEX.find(it)?.value }
+                ?: ParseUtil.UPI_REGEX.find(narr)?.value)?.lowercase(Locale.ROOT) ?: ""
             val payee = payeeFromNarration(narr, upi)
             val ref = cell(cRef).takeIf { it.isNotBlank() && it != "0" } ?: refFromNarration(narr) ?: ""
             val app = ParseUtil.detectApp(narr) ?: if (upi.isNotBlank() || narr.uppercase(Locale.ROOT).startsWith("UPI")) PayApp.BANK else PayApp.OTHER

@@ -26,7 +26,7 @@ object Ocr {
                 recognizer.process(image)
                     .addOnSuccessListener { result ->
                         // ML Kit groups into blocks; emit lines top-to-bottom for the parser.
-                        val lines = result.textBlocks.flatMap { b -> b.lines.map { l -> l.boundingBox?.top ?: 0 to l.text } }
+                        val lines = result.textBlocks.flatMap { b -> b.lines.map { l -> (l.boundingBox?.top ?: 0) to l.text } }
                             .sortedBy { it.first }
                             .map { it.second }
                         cont.resume(lines.joinToString("\n"))

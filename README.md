@@ -25,7 +25,7 @@ Everything is in a local SQLite database on the phone (included in Android backu
 
 Requires JDK 17 and the Android SDK (platform 35). `./gradlew assembleRelease`.
 
-Release signing reads `keystore/keystore.properties` locally, or `KEYSTORE_FILE`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` from the environment in CI. Without a keystore the release build falls back to the debug key (fine for personal sideloading, but updates must always be signed with the same key, so keep the keystore).
+Release signing uses `keystore/upi-ledger-release.jks` (committed; the repo must stay private) with the password from `keystore/keystore.properties` locally or the `KEYSTORE_PASSWORD` repository secret in CI. Without the password the release build falls back to a throwaway debug key, and an APK signed that way cannot be updated in place, so set the secret before installing.
 
 The GitHub Actions workflow in `.github/workflows/build.yml` runs the parser tests, builds a signed APK on every push to `main`, and attaches it to a GitHub release tagged with the version.
 

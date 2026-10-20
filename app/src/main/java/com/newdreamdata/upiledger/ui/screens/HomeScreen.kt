@@ -109,7 +109,7 @@ fun HomeScreen(vm: LedgerViewModel, bottomPadding: PaddingValues) {
                 Column(Modifier.padding(top = 8.dp)) {
                     Text("Quick add", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(quick, key = { it.payee + it.upiId }) { q ->
+                        items(quick) { q ->
                             AssistChip(
                                 onClick = { vm.startQuick(q) },
                                 label = { Text(q.payee.ifBlank { q.upiId } + " · " + Money.format(q.lastAmountPaise), maxLines = 1, overflow = TextOverflow.Ellipsis) }
